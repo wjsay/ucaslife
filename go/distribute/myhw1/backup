@@ -1,0 +1,155 @@
+package main
+
+import (
+	"bufio"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net"
+	"os"
+	"strings"
+	"time"
+)
+
+const SEP string = "SEP"
+const MARK string = "MARK"
+const LOOPMESSAGE string = "m"
+const CMDSNAPSHOT string = "m"
+const CMDCLEAR string = "c"
+
+type Client struct {
+	ID           string          `json:"id"`
+	LocalAddress string          `json:"localAddress"`
+	Others       []*MyConnection `json:"others"`
+	id2MyConn    map[string]*MyConnection
+}
+
+type MyConnection struct {
+	amount        int
+	ID            string `json:"channelId"`
+	RemoteAddress string `json:"remoteAddress"`
+	record        bool
+}
+
+func (th *Client) init(fileanme string) error {
+	fd, err := ioutil.ReadFile(fileanme)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(fd, &th)
+	if err != nil {
+		return err
+	}
+	th.id2MyConn = make(map[string]*MyConnection)
+	for _, myconn := range th.Others {
+		th.id2MyConn[myconn.ID] = myconn
+		myconn.amount = 101
+	}
+	return nil
+}
+
+func (th *MyConnection) snapshot() {
+	log.Printf("%s->%s： %d\n", th.ID, th.RemoteAddress, th.amount)
+}
+
+func (th *Client) loop() {
+	server, err := net.Listen("tcp", th.LocalAddress)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return
+	}
+	defer server.Close()
+	for {
+		conn, err := server.Accept()
+		defer conn.Close()
+		if err != nil {
+			log.Printf("cannot accept connection: %v", err)
+		}
+		//go func(conn net.Conn) {
+		buffer := make([]byte, 512)
+		n, err2 := conn.Read(buffer)
+		if err2 != nil {
+			log.Fatalln(err.Error())
+			return
+		}
+		data := strings.SplitN(string(buffer[0:n]), SEP, -1)
+		myconn, _ := th.id2MyConn[data[0]]
+		myconn = th.Others[0]
+		log.Println("receive", th.ID, th.LocalAddress, data, myconn.amount, myconn.record)
+		switch data[1] {
+		case MARK:
+			if myconn.record == false {
+				myconn.snapshot()
+				myconn.record = true
+				//conn.Write([]byte(MARK))
+				myconn.SendData([]byte(MARK))
+				conn.Close()
+			}
+			break
+		case LOOPMESSAGE:
+			myconn.amount++
+			//conn.Write([]byte(LOOPMESSAGE))
+			myconn.SendData([]byte(LOOPMESSAGE))
+			break
+		default:
+			log.Fatalln("未匹配的信息", data)
+		}
+		time.Sleep(1 * time.Second)
+		//}(conn)
+	}
+}
+
+func (th *MyConnection) SendData(data []byte) error {
+	// 客户端发送数据到远程地址
+	conn, err := net.Dial("tcp", th.RemoteAddress)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	var buffer bytes.Buffer
+	buffer.Write([]byte(th.ID + SEP))
+	buffer.Write(data)
+	_, err = conn.Write(buffer.Bytes())
+	if err != nil { // 这里可以优化
+		log.Fatalln(err.Error())
+		return err
+	}
+	return nil
+}
+
+func main() {
+	var client1 Client
+	err1 := client1.init("client1.json")
+	if err1 != nil {
+		log.Fatalln(err1.Error())
+	}
+	var client2 Client
+	err2 := client2.init("client2.json")
+	if err2 != nil {
+		log.Fatalln(err2.Error())
+	}
+	myconn1 := client1.Others[0] // 代码都写2份是为了解耦合
+	myconn2 := client2.Others[0]
+	go client1.loop()
+	go client2.loop()
+	time.Sleep(1 * time.Second) // 等待client2服务器启动
+	myconn1.SendData([]byte(LOOPMESSAGE))
+	fmt.Print("请输入m抓取快照；c清除记录：")
+	for {
+		in := bufio.NewReader(os.Stdin)
+		cmd, _ := in.ReadString('\n')
+		switch cmd[0 : len(cmd)-1] {
+		case CMDSNAPSHOT:
+			myconn1.SendData([]byte(MARK))
+			break
+		case CMDCLEAR:
+			myconn1.record = false
+			myconn2.record = false
+			break
+		default:
+			fmt.Print("无效的指令，请输入m或c：")
+		}
+	}
+}

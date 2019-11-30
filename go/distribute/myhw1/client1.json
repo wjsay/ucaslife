@@ -1,0 +1,10 @@
+{
+    "id": "C1",
+    "localAddress": ":50001",
+    "others":[
+        {
+            "remoteAddress": ":50002",
+            "channelId": "1"
+        }
+    ]
+}
