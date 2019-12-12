@@ -9,6 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class Spider {
+    private static final Pattern imagePatter = Pattern.compile("<a href=.*><img");
+    private static final Pattern hrefPatter = Pattern.compile("(href=\"\\S*\")");
+    private static final  Pattern titlePatter = Pattern.compile("(title=\".*\")");
 
     public static void main(String[] args){
         Spider spider = new Spider();
@@ -32,13 +35,14 @@ class Spider {
             } catch (IOException e) {
                 Log.write("open stream exception");
             }
-            Pattern imagePatter = Pattern.compile("<a href=.*><img");
-            Pattern hrefPatter = Pattern.compile("(href=\"\\S*\")");
-            Pattern titlePatter = Pattern.compile("(title=\".*\")");
+            //Pattern imagePatter = Pattern.compile("<a href=.*><img");
+            //Pattern hrefPatter = Pattern.compile("(href=\"\\S*\")");
+            //Pattern titlePatter = Pattern.compile("(title=\".*\")");
             String line = null;
             try {
                 while ((line = reader.readLine()) != null) {
                     Matcher imageMatcher = imagePatter.matcher(line);
+                    // 没有用好正则
                     if (imageMatcher.find()) {
                         Matcher hrefMatcher = hrefPatter.matcher(imageMatcher.group(0));
                         String href = null, title = null;

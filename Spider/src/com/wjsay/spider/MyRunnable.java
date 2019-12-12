@@ -12,13 +12,16 @@ import java.util.regex.Pattern;
 public class MyRunnable implements Runnable {
     String url;
     String title;
+    // 读了Effective Java后，将imagePattern优化一下，避免创建不必要的对象
+    private static final Pattern imagePattern = Pattern.compile("(<img class=\"lazy\" src=\"//.+?\">?)");
+
     MyRunnable(String url, String title) {
         this.url = url;
         this.title = title;
     }
     @Override
     public void run() {
-        Pattern imagePattern = Pattern.compile("(<img class=\"lazy\" src=\"//.+?\">?)");
+        //Pattern imagePattern = Pattern.compile("(<img class=\"lazy\" src=\"//.+?\">?)");
         URL curl = null;
         BufferedReader reader = null;
         String imgURL = null;
