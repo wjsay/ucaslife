@@ -53,7 +53,7 @@ void bodyForce(Body *p, float dt, int n) {
   }
 
 }
-__global__ add(Body*p, float dt,int n) {
+__global__ void add(Body*p, float dt,int n) {
   int index = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
   for (int i = index; i < n; i += stride) {
@@ -75,7 +75,7 @@ int main(const int argc, const char** argv) {
    * pass values into the command line.
    */
 
-  int nBodies = 2<<11;
+  int nBodies = 2<<15;
   int salt = 0;
   if (argc > 1) nBodies = 2<<atoi(argv[1]);
 
