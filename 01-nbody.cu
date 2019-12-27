@@ -75,7 +75,7 @@ int main(const int argc, const char** argv) {
    * pass values into the command line.
    */
 
-  int nBodies = 2<<15;
+  int nBodies = 2<<11;
   int salt = 0;
   if (argc > 1) nBodies = 2<<atoi(argv[1]);
 
