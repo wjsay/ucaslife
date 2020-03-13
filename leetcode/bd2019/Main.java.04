@@ -1,0 +1,58 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
+import java.io.BufferedInputStream;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(new BufferedInputStream(System.in));
+        int T = sc.nextInt();
+        while(T-- > 0) {
+            int n = sc.nextInt();
+            List<Cat> cats = new ArrayList<>();
+            for (int i = 0; i < n; ++i) {
+                int m = sc.nextInt();
+                for (int j = 0; j < m; ++j) {
+                    int x = sc.nextInt();
+                    int y = sc.nextInt();
+                    cats.add(new Cat(x, y, i));
+                }                
+            }
+            int res = 1;
+            if (cats.size() > 1) {
+                Collections.sort(cats);
+                Cat pre = cats.get(0);
+                for (int i = 1, tmp = 1; i < cats.size(); ++i) {
+                    Cat cur = cats.get(i);
+                    if (pre.x == cur.x && pre.y == cur.y && pre.pos+1 == cur.pos) {
+                        if (++tmp > res) {
+                            res = tmp;
+                        }
+                    } else {
+                        tmp = 1;
+                    }
+                    pre = cur;
+                }
+            }
+            System.out.println(res);
+        }        
+    } 
+    static class Cat implements Comparable<Cat> {
+        int x, y, pos;
+        Cat(int x, int y, int pos) {
+            this.x = x;
+            this.y = y;
+            this.pos = pos;
+        }
+        @Override
+        public int compareTo(Cat o2) {
+            if (x == o2.x && y == o2.y) {
+                return pos - o2.pos;
+            }
+            if (x < o2.x) return -1;
+            if (x == o2.x) return y - o2.y;
+            return 1;
+        }
+    }
+}

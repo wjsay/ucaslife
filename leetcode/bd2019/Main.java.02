@@ -1,0 +1,27 @@
+import java.io.BufferedInputStream;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(new BufferedInputStream(System.in));
+        int N = sc.nextInt();
+        int D = sc.nextInt();
+        int[] ary = new int[N];
+        for (int i = 0; i < N; ++i) {
+            ary[i] = sc.nextInt();
+        }
+        int L = 0, mod = 99997867;
+        long res = 0;
+        for (int R = 1; R < N; ++R) {
+            while(ary[R] - ary[L] > D) L++;
+            long delta = R - L;
+            if (delta >= 2) {
+                res += delta * (delta-1) / 2;
+                if (res >= mod) {
+                    res %= mod;
+                }
+            }
+        }
+        System.out.println(res);
+    }
+}

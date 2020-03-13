@@ -1,0 +1,19 @@
+import java.io.BufferedInputStream;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(new BufferedInputStream(System.in));
+        int n = sc.nextInt();
+        n = 1024 - n;
+        int cnt  = n % 4; // 1
+        n >>= 2;
+        cnt += n % 4; // 4
+        n >>= 2;
+        cnt += n % 4; // 16
+        n >>= 2;
+        cnt += n;  // 64
+
+        System.out.println(cnt);
+    }
+}

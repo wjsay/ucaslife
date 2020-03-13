@@ -1,0 +1,55 @@
+import java.io.BufferedInputStream;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(new BufferedInputStream(System.in));
+        int[] ary = new int[10];
+        for (int i = 0; i < 13; ++i) {
+            ary[sc.nextInt()]++;
+        }
+        boolean flag = false;
+        for (int i = 1; i <= 9; ++i) if(ary[i] < 4) {
+            ary[i]++;
+            if (check(ary)) {
+                System.out.print(flag ? " " + i : i);
+                flag = true;
+            }
+            ary[i]--;
+        }
+        System.out.println(flag ? "" : 0);
+    }
+
+    static boolean check(final int[] array) {
+        int[] cnt = array.clone();
+        for (int k = 1; k <= 9; ++k) {
+            int[] tmp = cnt.clone();
+            if (cnt[k] >= 2) {  // 雀头
+                cnt[k] -= 2;
+                boolean flag = true;
+                for (int i = 1; i <= 7; ++i) {
+                    if (cnt[i] == 0 || cnt[i] == 3) {
+                        continue;
+                    }
+                    if (cnt[i] == 1 || cnt[i] == 4) {
+                        cnt[i]--;
+                        cnt[i+1]--;
+                        cnt[i+2]--;
+                    } else if (cnt[i] == 2) {
+                        cnt[i] -= 2;
+                        cnt[i+1] -= 2;
+                        cnt[i+2] -= 2;
+                    } else {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag
+                    && (cnt[9] == 0 || cnt[9] == 3)
+                    && (cnt[8] == 0 || cnt[8] == 3)) return true;
+            }
+            cnt = tmp;
+        }
+        return false;
+    }
+}

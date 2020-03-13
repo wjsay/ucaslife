@@ -1,0 +1,27 @@
+import java.util.Scanner;
+import java.io.BufferedInputStream;
+
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(new BufferedInputStream(System.in));
+        int n = Integer.parseInt(sc.nextLine());
+        while (n-- > 0) {
+            String str = sc.nextLine();
+            StringBuilder builder = new StringBuilder("&#%");
+            int top = 2;
+            for (int i = 0; i < str.length(); ++i) {
+                char ch = str.charAt(i);
+                if (ch == builder.charAt(top)) {
+                    if (ch == builder.charAt(top-1) || builder.charAt(top-2) == builder.charAt(top-1)) {
+                        continue;
+                    }
+                }
+                top++;
+                builder.append(ch);
+            }
+            str = builder.toString().substring(3);
+            System.out.println(str);
+        }
+    }
+}

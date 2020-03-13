@@ -1,0 +1,37 @@
+import java.io.BufferedInputStream;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(new BufferedInputStream(System.in));
+        int n = sc.nextInt();
+        int[][] mat = new int[n][n];
+        for (int i = 0 ; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                mat[i][j] = sc.nextInt();
+            }
+        }
+        int m = 1 << (n-1); // 111 代表城市123
+        int[][] dp = new int[n][m];
+        for (int i = 0; i < n; ++i) {
+            dp[i][0] = mat[i][0];  // 不经过任何城市，直接回去
+        }
+        for (int j = 1; j < m; ++j) { // 经过哪些城市
+            for (int i = 1; i < n; ++i) { // 第一站
+                dp[i][j] = Integer.MAX_VALUE;  // 初始化
+                if ((j >> i-1 & 1) == 1) continue; // i不能在j集合中，因为城市不能重。i-j->0
+                for (int k = 1; k < n; ++k) { // 中间站
+                    if ((j >> k-1 & 1) == 1) {  // k站早已走过了 - << == &
+                        int left = j ^ (1 << k-1);  //扣掉k站，因为就是要用中间站来更新
+                        dp[i][j] = Math.min(dp[i][j], mat[i][k] + dp[k][left]); 
+                    }
+                }
+            }
+        }
+        dp[0][m-1] = Integer.MAX_VALUE;
+        for (int i = 1; i < n; ++i) {
+            dp[0][m-1] = Math.min(dp[0][m-1], mat[0][i] + dp[i][m-1 ^ (1 << i-1)]);
+        }  // 也可以去掉这三行，并把三层循环中的i从0开始。（正数右移-1得0）
+        System.out.println(n <= 1 ? 0 : dp[0][m-1]);
+    }
+}
