@@ -1,0 +1,177 @@
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Main {
+    static int ex = -1, ey = -1;
+    static int row = 0, col = 0;
+    static int[][] dir = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        row = sc.nextInt();
+        col = sc.nextInt();
+        int sx = -1, sy = -1, ox = -1, oy = -1;
+        char[][] map = new char[row][];
+        boolean[] vis = new boolean[row * 125000];
+        for (int i = 0; i < row; ++i) {
+            String record = sc.next();
+            map[i] = record.toCharArray();
+            if (sy == -1) {sy = record.indexOf('S'); sx = i; }
+            if (ey == -1) {ey = record.indexOf('E'); ex = i; }
+            if (oy == -1) {oy = record.indexOf('0'); ox = i; }
+        }
+        int res = -1;
+        Queue<Pair> pq = new PriorityQueue<>();
+        Pair pos = new Pair(sx, sy, ox, oy, 0);
+        pq.add(pos);
+        vis[Pair.hash(sx, sy, ox, oy)] = true;
+        out:
+        while(!pq.isEmpty()) {
+            pos = pq.poll();
+            for (int i= 0; i < 4; ++i) {
+                int xx = pos.x + dir[i][0];
+                int yy = pos.y + dir[i][1];
+                if (check(xx, yy) && map[xx][yy] != '#') {
+                    if (xx == pos.ox && yy == pos.oy) {  // 推箱子
+                        int oxx = xx + dir[i][0];
+                        int oyy = yy + dir[i][1];
+                        if (check(oxx, oyy) && map[oxx][oyy] != '#') {
+                            if (map[oxx][oyy] == 'E') {  // oxx == ex && oyy == ey
+                                res = pos.step + 1;
+                                pq.clear();
+                                break out;
+                            }
+                            int hash = Pair.hash(xx, yy, oxx, oyy); 
+                            if (!vis[hash]) {
+                                vis[hash] = true;
+                                pq.add(new Pair(xx, yy, oxx, oyy, pos.step + 1));
+                            }                            
+                        }
+                    } else {
+                        int hash = Pair.hash(xx, yy, pos.ox, pos.oy);
+                        if (!vis[hash]) {
+                            vis[hash] = true;
+                            pq.add(new Pair(xx, yy, pos.ox, pos.oy, pos.step + 1));
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println(res);
+    }
+    static boolean check(int x, int y) {
+        return x >= 0 && x < row && y >= 0 && y < col;
+    }
+    static class Pair implements Comparable<Pair> {
+        int x, y, ox, oy, step;
+        Pair(int x, int y, int ox, int oy, int step) {
+            this.x = x;
+            this.y = y;
+            this.ox = ox;
+            this.oy = oy;
+            this.step = step;
+        }
+        @Override
+        public int compareTo(Pair o2) {  // 先找到箱子，再推箱子
+            if (step != o2.step) return step - o2.step;
+            int d1 = Math.abs(x - ox) + Math.abs(y - oy);
+            int d2 = Math.abs(o2.x -ox) + Math.abs(o2.y - oy);
+            if (d1 != d2) return d1 - d2;
+            d1 = Math.abs(x - ex) + Math.abs(y - ey);
+            d2 = Math.abs(o2.x - ex) + Math.abs(o2.y - ey);
+            if (d1 != d2) return d1 - d2;
+            return x == o2.x ? y - o2.y : x - o2.x;
+        }
+        static int hash (int x, int y, int ox, int oy) {
+            return x * 125000 + y * 2500 + ox * 50 + oy;
+        }
+    } 
+} 
+
+/*
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Main {
+    static int ex = -1, ey = -1;
+    static int row = 0, col = 0;
+    static int[][] dir = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    static char[][] map;
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        row = sc.nextInt();
+        col = sc.nextInt();
+        int sx = -1, sy = -1, ox = -1, oy = -1;
+        map = new char[row][];
+        boolean[][][][] vis = new boolean[row][col][row][col];
+        for (int i = 0; i < row; ++i) {
+            String record = sc.next();
+            map[i] = record.toCharArray();
+            if (sy == -1) {sy = record.indexOf('S'); sx = i; }
+            if (ey == -1) {ey = record.indexOf('E'); ex = i; }
+            if (oy == -1) {oy = record.indexOf('0'); ox = i; }
+        }
+        int res = -1;
+        Queue<Pair> pq = new PriorityQueue<>();
+        Pair pos = new Pair(sx, sy, ox, oy, 0);
+        pq.add(pos);
+        vis[sx][sy][ox][oy] = true;
+        out:
+        while(!pq.isEmpty()) {
+            pos = pq.poll();
+            for (int i= 0; i < 4; ++i) {
+                int xx = pos.x + dir[i][0];
+                int yy = pos.y + dir[i][1];
+                if (check(xx, yy)) {
+                    if (xx == pos.ox && yy == pos.oy) {  // 推箱子
+                        int oxx = xx + dir[i][0];
+                        int oyy = yy + dir[i][1];
+                        if (check(oxx, oyy)) {
+                            if (oxx == ex && oyy == ey) {
+                                res = pos.step + 1;
+                                pq.clear();
+                                break out;
+                            }
+                            if (!vis[xx][yy][oxx][oyy]) {
+                                vis[xx][yy][oxx][oyy] = true;
+                                pq.add(new Pair(xx, yy, oxx, oyy, pos.step + 1));
+                            }                            
+                        }
+                    } else {
+                        if (!vis[xx][yy][pos.ox][pos.oy]) {
+                            vis[xx][yy][pos.ox][pos.oy] = true;
+                            pq.add(new Pair(xx, yy, pos.ox, pos.oy, pos.step + 1));
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println(res);
+    }
+    static boolean check(int x, int y) {
+        return x >= 0 && x < row && y >= 0 && y < col && map[x][y] != '#';
+    }
+    static class Pair implements Comparable<Pair> {
+        int x, y, ox, oy, step;
+        Pair(int x, int y, int ox, int oy, int step) {
+            this.x = x;
+            this.y = y;
+            this.ox = ox;
+            this.oy = oy;
+            this.step = step;
+        }
+        @Override
+        public int compareTo(Pair o2) {  // 步数少者优先，先找到箱子，再推箱子
+            if (step != o2.step) return step - o2.step;
+            int d1 = Math.abs(x - ox) + Math.abs(y - oy);
+            int d2 = Math.abs(o2.x -ox) + Math.abs(o2.y - oy);
+            if (d1 != d2) return d1 - d2;
+            d1 = Math.abs(x - ex) + Math.abs(y - ey);
+            d2 = Math.abs(o2.x - ex) + Math.abs(o2.y - ey);
+            if (d1 != d2) return d1 - d2;
+            return x == o2.x ? y - o2.y : x - o2.x;
+        }
+    } 
+} 
+*/

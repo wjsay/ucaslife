@@ -1,0 +1,38 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int x = sc.nextInt();
+        long[] rooms = new long[n+1];
+        long minV = Integer.MAX_VALUE;
+        int target = x;  // <= x的最大值，因为i到x的值要减1
+        for (int i = 1; i <= n; ++i) {
+            rooms[i] = sc.nextInt();
+            if (rooms[i] < minV) {
+                minV = rooms[i];
+            } 
+        }
+        while (rooms[target] != minV) {
+            target--;
+            if (target == 0) target = n;
+        }
+        for (int i = 1; i <= n; ++i) {
+            rooms[i] -= minV;
+        } 
+        int i = target;
+        int cnt = 0;
+        while (i != x) {
+            if (++i > n) i = 1;
+            rooms[i]--;
+            cnt++;
+        }
+        rooms[target] = minV * n + cnt;
+        System.out.print(rooms[1]);
+        for (int k = 2; k <= n; ++k) {
+            System.out.print(" " + rooms[k]);
+        }
+        System.out.println();
+    }
+} 

@@ -1,0 +1,30 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int m = Integer.parseInt(sc.nextLine().split(" ")[1]);
+        String str = sc.nextLine();
+        System.out.println(Math.max(work(str, 'a', m), work(str, 'b', m)));
+    }
+    static int work(String str, char ch, int m) {
+        List<Integer> que = new ArrayList<>();
+        int maxLen = 0, left = 0;
+        for (int i = 0, tmp = 0; i < str.length(); ++i) {
+            if (str.charAt(i) == ch) {
+                tmp++;                
+            } else {
+                que.add(i);
+                if (que.size() > m) {
+                    tmp = i - que.get(left++);
+                } else {
+                    tmp++;
+                }
+            }
+            maxLen = Math.max(maxLen, tmp);
+        }
+        return maxLen;
+    }
+} 

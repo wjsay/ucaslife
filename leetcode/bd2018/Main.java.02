@@ -1,0 +1,89 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        while(T-- > 0) {
+            long n = sc.nextLong();
+            long k = sc.nextLong();
+            long d1 = sc.nextLong();
+            long d2 = sc.nextLong();
+            long left = n - k;
+            boolean checkEvil = false;
+            if (n % 3 == 0) {
+                if (d1 != 0 && d2 != 0) {
+                    checkEvil = check(left, 2*d1 + d2) || check(left, d1 + d2) || check(left, d1 + 2*d2) || check(left, d1, d2);
+                } else {
+                    if (!checkEvil && d1 == 0) {
+                        checkEvil = check(left, 2*d2) || n/3 >= d2 && check(left, d2);
+                    }
+                    if (!checkEvil && d2 == 0) {
+                        checkEvil = check(left, 2*d1) || n/3 >= d1 && check(left, d1);
+                    }
+                }
+            }
+            System.out.println(checkEvil ? "yes" : "no");
+
+        }
+    }
+    static boolean check(long left, long delta) {
+        return left >= delta && (left-delta) % 3 == 0;
+    }
+    static boolean check(long left, long d1, long d2) { // \/
+        if (d1 > d2) {
+            long tmp = d1;
+            d1 = d2;
+            d2 = tmp;
+        }
+        return check(left, d2 + d2 - d1);
+    }
+} 
+
+/*
+5
+3 0 0 0
+3 3 0 0
+6 4 1 0
+6 3 3 0
+3 3 3 2
+yes
+yes
+yes
+no
+no
+6
+124272371505 14857869176 3504489017 5415377887
+444050665588 203397123071 47794909135 42499609248
+335265500614 163750570012 61911921323 15109080991
+450754198180 104339494534 94127327352 1058880080
+542466530501 404970527310 258843105264 215354440674
+77835122322 43362966016 15047129062 4559565552
+yes
+no
+no
+no
+no
+yes
+10
+258385599125 78092069277 6824838688 39628564455
+961358140081 172524445203 168643038048 703076070
+183413115088 61006893426 42630932464 7201202280
+448053313254 171971692805 50323825411 13453364400
+282398722857 278340973669 37290210123 16512004042
+296233191093 21735861291 5394721649 15478838524
+448264125858 87301326439 76304721876 5156086809
+733774364611 580351746525 13381971740 116560212382
+583722032663 125450580360 7293880654 19868130882
+133923316342 3749675927 911719959 1194948085
+no
+no
+no
+yes
+no
+yes
+no
+no
+no
+no
+*/
